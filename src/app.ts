@@ -1,22 +1,24 @@
-import { PodcastTransferModel } from "../models/Podcast-Transfer-Model";
-import { repositoryPodcast } from "../repositories/podcasts-repository";
-import { StatusCode } from "../utils/status-code";
+import * as http from "http";
 
-export const serviceListEpisodes = async (): Promise<PodcastTransferModel> => {
-  //define contrato
-  let responseFormat: PodcastTransferModel = {
-    statusCode: 0,
-    body: [],
-  };
+import {
+  getListEpisodes,
+  getFilterEpisodes,
+} from "./controllers/podscasts-controller";
 
-  //busco os dados
-  const data = await repositoryPodcast();
+import { Routes } from "./routes/routes";
+import { HttpMethod } from "./utils/http-methods";
 
-  //verifico o tipo de resposta
-  responseFormat = {
-    statusCode: data.length !== 0 ? StatusCode.OK : StatusCode.NoContent,
-    body: data,
-  };
+export const app = async (
+  request: http.IncomingMessage,
+  response: http.ServerResponse
+) => {
+  const baseUrl = request.url?.split("?")[0];
 
-  return responseFormat;
+  if (request.method === HttpMethod.GET && baseUrl === Routes.LIST) {
+    await getListEpisodes(request, response);
+  }
+
+  if (request.method === HttpMethod.GET && baseUrl === Routes.ESPISODE) {
+    await getFilterEpisodes(request, response);
+  }
 };
